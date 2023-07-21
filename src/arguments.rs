@@ -11,6 +11,6 @@ pub struct ContextArgs {
     #[clap(short, long)]
     pub config: Option<PathBuf>,
 
-    #[clap(default_value = "")]
+    #[clap()]
     pub operation: Vec<String>,
 }
