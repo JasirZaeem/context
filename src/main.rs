@@ -1,3 +1,9 @@
+use clap::Parser;
+use context::arguments::ContextArgs;
+
+
 fn main() {
-    println!("Hello, world!");
+    let args = ContextArgs::parse();
+
+    println!("{:?}", args);
 }
