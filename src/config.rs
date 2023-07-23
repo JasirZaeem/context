@@ -3,7 +3,7 @@ use std::path::{PathBuf};
 use crate::arguments::ContextArgs;
 use anyhow::{Result, anyhow, Context};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Operation {
     Print(Option<String>),
     Add(String, String),
@@ -109,5 +109,74 @@ impl TryFrom<ContextArgs> for ContextConfig {
             config: get_config_path_or_default(args.config)?,
             pwd: get_pwd_or_default(args.pwd)?,
         })
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use anyhow::Result;
+
+    use crate::config::{Operation};
+    use crate::arguments::ContextArgs;
+    use super::ContextConfig;
+
+    #[test]
+    fn test_implicit_print_all() -> Result<()> {
+        let config: ContextConfig = ContextArgs {
+            pwd: None,
+            config: None,
+            operation: vec![],
+        }.try_into()?;
+
+        assert_eq!(config.operation, Operation::Print(None));
+        Ok(())
+    }
+
+    #[test]
+    fn test_print_all() -> Result<()> {
+        let config: ContextConfig = ContextArgs {
+            pwd: None,
+            config: None,
+            operation: vec!["print".to_string()],
+        }.try_into()?;
+
+        assert_eq!(config.operation, Operation::Print(None));
+        Ok(())
+    }
+
+    #[test]
+    fn test_print_key() -> Result<()> {
+        let config: ContextConfig = ContextArgs {
+            pwd: None,
+            config: None,
+            operation: vec!["print".to_string(), "key".to_string()],
+        }.try_into()?;
+
+        assert_eq!(config.operation, Operation::Print(Some("key".to_string())));
+        Ok(())
+    }
+
+    #[test]
+    fn test_add_key_value() -> Result<()> {
+        let config: ContextConfig = ContextArgs {
+            pwd: None,
+            config: None,
+            operation: vec!["add".to_string(), "key".to_string(), "value".to_string()],
+        }.try_into()?;
+
+        assert_eq!(config.operation, Operation::Add("key".to_string(), "value".to_string()));
+        Ok(())
+    }
+
+    #[test]
+    fn test_remove_key() -> Result<()> {
+        let config: ContextConfig = ContextArgs {
+            pwd: None,
+            config: None,
+            operation: vec!["rm".to_string(), "key".to_string()],
+        }.try_into()?;
+
+        assert_eq!(config.operation, Operation::Remove("key".to_string()));
+        Ok(())
     }
 }
