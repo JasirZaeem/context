@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
+use anyhow::Result;
 
 #[derive(Debug, Default, Deserialize, Serialize)]
 struct ContextData {
@@ -65,8 +66,22 @@ impl Context {
     pub fn remove_value(&mut self, key: &str) {
         self.data.context.entry(self.pwd.clone()).or_default().remove(key);
     }
+
     pub fn config_path(&self) -> &PathBuf {
         &self.config_path
+    }
+
+    pub fn save(&self) -> Result<()> {
+        if let Some(parent) = self.config_path.parent() {
+            if std::fs::metadata(&parent).is_err() {
+                std::fs::create_dir_all(parent)?;
+            }
+        }
+
+        let json_string = serde_json::to_string(&self.data)?;
+        std::fs::write(&self.config_path, json_string)?;
+
+        return Ok(());
     }
 
     pub fn from_config_props(config_path: PathBuf, pwd: PathBuf) -> Self {

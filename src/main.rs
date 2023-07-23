@@ -17,9 +17,11 @@ fn main() -> Result<()> {
         }
         Operation::Add(k, v) => {
             context.set_value(k, v);
+            context.save()?;
         }
         Operation::Remove(k) => {
             context.remove_value(&k);
+            context.save()?;
         }
         Operation::Config => {
             println!("{:?}", context.config_path());
